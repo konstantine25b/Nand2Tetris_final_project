@@ -1,213 +1,79 @@
 # HDL Parser and Chip Testing Framework
 
-## Overview
+My final project for Nand2Tetris 2025 Spring course.
 
-This project implements a complete HDL (Hardware Description Language) parser and chip testing framework for the Nand2Tetris course. It parses syntactically correct HDL files, builds internal chip models, simulates chip behavior, and automatically tests chips against provided input-output test vectors.
+## What This Project Does
 
-## ✅ Assignment Requirements Compliance
+I built a complete HDL parser and testing framework that can:
 
-### Core Deliverables (100% Complete)
+- Parse HDL files and understand chip definitions
+- Simulate how chips work with different inputs
+- Run automated tests to make sure everything works correctly
+- Handle both simple gates (And, Or) and complex chips (like FullAdder)
 
-1. **✅ HDL Parser and Simulator (70 points)**
-
-   - ✅ Parses HDL files to represent chip structure and connections
-   - ✅ Simulates chip logic based on input values
-   - ✅ Handles all required built-in gates (`Nand`, `Not`, `And`, `Or`)
-   - ✅ Supports chip instantiations and recursive parsing
-   - ✅ Correctly implements logic for each built-in chip
-
-2. **✅ Testing Framework (20 points)**
-
-   - ✅ Reads test vectors specifying input values and expected outputs
-   - ✅ Applies input vectors to the chip simulator
-   - ✅ Compares actual outputs with expected outputs
-   - ✅ Prints detailed test reports and summary statistics
-
-3. **✅ Documentation and Code Quality (10 points)**
-   - ✅ Complete documentation on how to run the program
-   - ✅ Detailed description of approach and architecture
-   - ✅ Example HDL and test vector files included
-   - ✅ Clean, well-formatted code following PEP 8
-
-### Built-in Chips Support (✅ Complete)
-
-All required built-in chips are fully implemented with correct logic:
-
-| Chip Name | Description       | Inputs | Outputs | Status |
-| --------- | ----------------- | ------ | ------- | ------ |
-| `Nand`    | Logical NAND gate | 2      | 1       | ✅     |
-| `Not`     | Logical NOT gate  | 1      | 1       | ✅     |
-| `And`     | Logical AND gate  | 2      | 1       | ✅     |
-| `Or`      | Logical OR gate   | 2      | 1       | ✅     |
-
-### Non Built-in Chips Handling (✅ Complete)
-
-- ✅ Automatically locates and parses corresponding HDL files
-- ✅ Builds internal representation from `IN`, `OUT`, and `PARTS` sections
-- ✅ Recursively resolves chip instantiations
-- ✅ Correctly simulates composed chips down to built-in primitives
-- ✅ Assumes HDL files are in same directory (as specified)
-
-## Enhanced Features (Beyond Requirements)
-
-Our implementation includes significant improvements for better decomposition and maintainability:
-
-### 🏗️ Improved Architecture with Design Patterns
-
-- **Strategy Pattern**: Gate logic implementations are pluggable and extensible
-- **Factory Pattern**: Centralized gate creation with `GateFactory` and `GateRegistry`
-- **Builder Pattern**: Chip definitions with comprehensive validation
-- **Data Transfer Objects**: Robust models with validation and serialization
-
-### 📊 Advanced Testing and Validation
-
-- **Comprehensive Test Coverage**: 53+ unit and integration tests
-- **Test Result Models**: Rich test reporting with timestamps, execution times, and status tracking
-- **Connection Validation**: Detects invalid signal connections and unused signals
-- **Truth Table Validation**: Automatic verification of gate implementations
-
-### 🔧 Enhanced Error Handling and Validation
-
-- **Input Validation**: Comprehensive validation of pin names, values, and connections
-- **Signal Flow Analysis**: Validates that internal signals have proper sources
-- **Chip Definition Validation**: Ensures consistent pins and valid identifiers
-- **Test Vector Validation**: Validates test case consistency and format
+Basically, you give it an HDL file and a test file, and it tells you if your chip implementation is correct or not.
 
 ## Project Structure
 
 ```
 HDL_Konstantine_Bakhutashvili/
-├── README.md                     # This documentation
-├── requirements.txt              # Python dependencies
-├── main.py                      # Main entry point
+├── README.md                     # This file
+├── requirements.txt              # Python stuff (but we only use standard library)
+├── main.py                      # Run this to test your chips
 ├── venv/                        # Virtual environment
-├── src/                         # Source code
-│   ├── __init__.py
-│   ├── hdl_parser.py            # HDL file parser
-│   ├── chip_simulator.py        # Chip simulation engine
-│   ├── tester.py                # Testing framework
-│   ├── models/                  # Enhanced data models
-│   │   ├── __init__.py
-│   │   ├── chip_models.py       # Chip definitions and validation
-│   │   └── test_models.py       # Test cases and reporting
-│   └── gates/                   # Built-in gate implementations
-│       ├── __init__.py
-│       └── builtin_gates.py     # Strategy pattern gate logic
-├── examples/                    # Sample HDL and test files
-│   ├── And.hdl                 # AND gate implementation
-│   ├── And.tst                 # AND gate test vectors
-│   ├── Or.hdl                  # OR gate implementation
-│   ├── Or.tst                  # OR gate test vectors
-│   ├── Xor.hdl                 # XOR gate implementation
-│   ├── Xor.tst                 # XOR gate test vectors
-│   ├── DMux.hdl                # Demultiplexer implementation
-│   ├── DMux.tst                # Demultiplexer test vectors
-│   ├── Mux.hdl                 # Multiplexer implementation
-│   ├── Mux.tst                 # Multiplexer test vectors
-│   ├── HalfAdder.hdl           # Half adder implementation
-│   ├── HalfAdder.tst           # Half adder test vectors
-│   ├── FullAdder.hdl           # Full adder implementation
-│   └── FullAdder.tst           # Full adder test vectors
-├── tests/                       # Unit and integration tests
-│   ├── __init__.py
-│   ├── test_basic.py           # Legacy compatibility tests
-│   ├── test_models.py          # Model validation tests
-│   └── test_gates.py           # Gate implementation tests
+├── src/                         # All my code
+│   ├── hdl_parser.py            # Parses HDL files
+│   ├── chip_simulator.py        # Simulates chips
+│   ├── tester.py                # Runs tests
+│   ├── models/                  # Data structures I made
+│   └── gates/                   # Built-in gate logic
+├── examples/                    # Test chips I created
+│   ├── And.hdl & And.tst       # Simple AND gate
+│   ├── Or.hdl & Or.tst         # Simple OR gate
+│   ├── Xor.hdl & Xor.tst       # XOR gate (more complex)
+│   ├── DMux.hdl & DMux.tst     # Demultiplexer
+│   ├── Mux.hdl & Mux.tst       # Multiplexer
+│   ├── HalfAdder.hdl & HalfAdder.tst  # Half adder
+│   └── FullAdder.hdl & FullAdder.tst  # Full adder (uses HalfAdder!)
+└── tests/                       # Unit tests (53 tests total)
 ```
 
-## Installation
+## How to Run It
 
-### Prerequisites
-
-- Python 3.7 or higher
-- No external dependencies required (uses Python standard library only)
-
-### Setup Instructions
-
-1. **Create and activate a virtual environment**:
-
-   ```bash
-   # Create virtual environment
-   python3 -m venv venv
-
-   # Activate virtual environment
-   # On macOS/Linux:
-   source venv/bin/activate
-
-   # On Windows:
-   # venv\Scripts\activate
-   ```
-
-2. **Install dependencies** (optional, since we use only standard library):
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Verify installation**:
-   ```bash
-   python main.py --help
-   ```
-
-## Usage
-
-### Quick Start
-
-Test the included examples:
+### Setup (First Time Only)
 
 ```bash
-# Activate virtual environment first
+# Create virtual environment
+python3 -m venv venv
+
+# Activate it
+source venv/bin/activate
+
+# That's it! No external dependencies needed
+```
+
+### Testing Your Chips
+
+```bash
+# Always activate venv first
 source venv/bin/activate
 
 # Test a single chip
 python main.py examples/And.hdl examples/And.tst
 
-# Test multiple chips
-python main.py examples/And.hdl examples/And.tst examples/Or.hdl examples/Or.tst examples/Xor.hdl examples/Xor.tst
-
-# Test comprehensive examples (all 7 chips with 36 test cases)
-python main.py examples/And.hdl examples/And.tst examples/Or.hdl examples/Or.tst examples/Xor.hdl examples/Xor.tst examples/DMux.hdl examples/DMux.tst examples/Mux.hdl examples/Mux.tst examples/HalfAdder.hdl examples/HalfAdder.tst examples/FullAdder.hdl examples/FullAdder.tst
-
-# Run all unit and integration tests
-python main.py --run-all-tests
-```
-
-### Command Line Options
-
-```bash
-python main.py [OPTIONS] <hdl_file> <test_file> [<hdl_file> <test_file> ...]
-
-Options:
-  -v, --verbose     Enable verbose output (show all test details)
-  -s, --summary     Show only summary (default behavior)
-  -d, --directory   Base directory for HDL files (default: current directory)
-  --run-all-tests   Run all unit tests and integration tests
-  -h, --help        Show help message
-
-Arguments:
-  Files must be provided in pairs: HDL file followed by its test file
-```
-
-### Examples
-
-```bash
-# Basic usage
-python main.py examples/And.hdl examples/And.tst
-
-# Verbose output
-python main.py -v examples/And.hdl examples/And.tst
-
-# Multiple chips
+# Test multiple chips at once
 python main.py examples/And.hdl examples/And.tst examples/Or.hdl examples/Or.tst
 
-# Specify base directory
-python main.py -d /path/to/hdl/files And.hdl And.tst
+# Test all my examples (7 chips, 36 test cases)
+python main.py examples/And.hdl examples/And.tst examples/Or.hdl examples/Or.tst examples/Xor.hdl examples/Xor.tst examples/DMux.hdl examples/DMux.tst examples/Mux.hdl examples/Mux.tst examples/HalfAdder.hdl examples/HalfAdder.tst examples/FullAdder.hdl examples/FullAdder.tst
 
-# Run all framework tests
+# Run all unit tests
 python main.py --run-all-tests
 ```
 
-### Expected Output
+### What You'll See
+
+When you run a test, you get output like this:
 
 ```
 HDL Parser and Chip Testing Framework
@@ -227,26 +93,26 @@ Summary: 4/4 tests passed (100.0%)
 ✅ All tests PASSED!
 ```
 
-## Input and Output Formats
+## File Formats
 
-### HDL File Format (✅ Supported)
+### HDL Files
 
-HDL files define chips with three main sections:
+Standard HDL format like we learned in class:
 
 ```hdl
-CHIP ChipName {
-    IN a, b;           // Input pins
-    OUT out;           // Output pins
+CHIP And {
+    IN a, b;
+    OUT out;
 
-    PARTS:             // Internal parts
+    PARTS:
     Nand(a=a, b=b, out=nandOut);
     Not(in=nandOut, out=out);
 }
 ```
 
-### Test Vector Format (✅ Supported)
+### Test Files
 
-Test files use CSV-style format as specified:
+CSV-style format as specified in the assignment:
 
 ```csv
 a,b;out
@@ -256,288 +122,94 @@ a,b;out
 1,1;1
 ```
 
-- First line: header with input and output pin names
-- Following lines: test cases with input values and expected outputs
-- Semicolon (`;`) separates inputs from outputs
-- Comma (`,`) separates multiple pins
+The semicolon separates inputs from outputs, commas separate multiple pins.
 
-### Program Output (✅ Implemented)
+## Built-in Gates
 
-- ✅ For each test case, prints pass/fail with details
-- ✅ At the end, prints summary count: how many tests passed out of total
-- ✅ Enhanced with execution times, status symbols, and detailed reporting
+My simulator knows about these 4 primitive gates (as required):
 
-## Architecture
+| Gate | Inputs | Outputs | What it does  |
+| ---- | ------ | ------- | ------------- |
+| Nand | 2      | 1       | NOT (a AND b) |
+| Not  | 1      | 1       | NOT in        |
+| And  | 2      | 1       | a AND b       |
+| Or   | 2      | 1       | a OR b        |
 
-### 1. HDL Parser (`src/hdl_parser.py`)
+Everything else gets parsed from HDL files.
 
-- Tokenizes HDL files with robust regex patterns
-- Parses `CHIP`, `IN`, `OUT`, and `PARTS` sections
-- Builds abstract syntax tree (AST) representation
-- Handles chip instantiations and pin connections
-- ✅ **Meets requirement**: "Parse HDL files assuming correct syntax"
+## Examples I Made
 
-### 2. Chip Simulator (`src/chip_simulator.py`)
+I created 7 different chips to test the framework:
 
-- Implements all required built-in gate logic
-- Manages chip instantiation and simulation
-- Handles signal propagation through chip networks
-- Supports recursive chip composition
-- ✅ **Meets requirement**: "Simulate chip behavior for given inputs"
+| Chip      | Complexity | Test Cases | Notes                    |
+| --------- | ---------- | ---------- | ------------------------ |
+| And       | Basic      | 4          | Uses Nand + Not          |
+| Or        | Basic      | 4          | Uses Nand + Not          |
+| Xor       | Medium     | 4          | Uses 5 sub-chips!        |
+| DMux      | Medium     | 4          | 1-to-2 demux             |
+| Mux       | Medium     | 8          | 2-to-1 mux with selector |
+| HalfAdder | Medium     | 4          | 1-bit addition           |
+| FullAdder | Complex    | 8          | Uses 2 HalfAdders + Or   |
 
-### 3. Testing Framework (`src/tester.py`)
+The FullAdder is especially cool because it shows recursive composition - it uses HalfAdders, which use Xor, which uses And/Or/Not, which use Nand. So it goes 4 levels deep!
 
-- Parses test vector files in CSV format
-- Applies input combinations to chips
-- Compares actual vs expected outputs
-- Generates detailed test reports
-- ✅ **Meets requirement**: "Verify outputs against expected results"
+## How It Works
 
-### 4. Enhanced Models (`src/models/`)
+1. **Parser** (`src/hdl_parser.py`): Reads HDL files and builds internal representation
+2. **Simulator** (`src/chip_simulator.py`): Actually runs the chips with given inputs
+3. **Tester** (`src/tester.py`): Reads test files and compares expected vs actual outputs
+4. **Main** (`main.py`): Ties everything together with command-line interface
 
-- **Chip Models**: Comprehensive chip definitions with validation
-- **Test Models**: Rich test reporting with status tracking and serialization
-- **Factory Functions**: Consistent object creation patterns
+The cool part is handling non-built-in chips. When my simulator sees something like `HalfAdder(...)`, it automatically finds and parses `HalfAdder.hdl`, then simulates that chip recursively.
 
-### 5. Gate System (`src/gates/`)
+## Assignment Requirements ✓
 
-- **Strategy Pattern**: Pluggable gate logic implementations
-- **Factory Pattern**: Centralized gate creation and registration
-- **Validation**: Automatic truth table verification
+I made sure to implement everything exactly as specified:
 
-## Running Tests
+- ✓ Parse HDL files (CHIP, IN, OUT, PARTS sections)
+- ✓ All 4 required built-in gates (Nand, Not, And, Or)
+- ✓ Handle chip instantiations and recursive parsing
+- ✓ Read CSV-style test vectors
+- ✓ Compare actual vs expected outputs
+- ✓ Print detailed test results + summary
+- ✓ Documentation and examples
 
-### Built-in Test Runner
+## Bonus Features
 
-Run all tests using the built-in test runner:
+I went a bit beyond the requirements because I got excited:
 
-```bash
-# Activate virtual environment
-source venv/bin/activate
-
-# Run all tests (53+ tests) with detailed output
-python main.py --run-all-tests
-```
-
-### Unit Tests
-
-Run the comprehensive test suite manually:
-
-```bash
-# Activate virtual environment
-source venv/bin/activate
-
-# Run all tests (53+ tests)
-python -m unittest discover tests/ -v
-
-# Run specific test modules
-python -m unittest tests/test_models.py -v
-python -m unittest tests/test_gates.py -v
-python -m unittest tests/test_basic.py -v
-```
-
-### Integration Tests
-
-Test the complete system with examples:
-
-```bash
-# Test all examples
-python main.py examples/And.hdl examples/And.tst examples/Or.hdl examples/Or.tst examples/Xor.hdl examples/Xor.tst
-```
+- **Better architecture**: Used design patterns to make code more organized
+- **More tests**: 53 unit tests to make sure everything works
+- **Better error messages**: Helpful validation and error reporting
+- **More examples**: 7 different chips instead of just basic gates
+- **Built-in test runner**: `--run-all-tests` option
 
 ## Troubleshooting
 
-### Common Issues
+**"No such file or directory"**  
+→ Make sure you're in the right directory and activate venv first
 
-1. **"No such file or directory"** error:
+**Import errors**  
+→ Run `source venv/bin/activate` first
 
-   - Ensure you're running from the correct directory
-   - Check that file paths are correct
-   - Make sure HDL files are in the same directory as referenced chips
+**Tests failing**  
+→ Check that your HDL file is in the same directory as the test file
 
-2. **Import errors**:
+## Development Notes
 
-   - Activate the virtual environment: `source venv/bin/activate`
-   - Check that you're running from the project root directory
+The hardest part was getting the recursive parsing right. Making sure that when FullAdder instantiates HalfAdder, and HalfAdder instantiates Xor, everything gets loaded and simulated correctly took a lot of debugging.
 
-3. **Permission errors**:
-   - On macOS/Linux, you may need to make main.py executable: `chmod +x main.py`
+I also spent time making the test output look nice and informative. The assignment just asked for pass/fail, but I added colors, progress indicators, and detailed error messages.
 
-### Virtual Environment Issues
+The code structure uses some fancy patterns I learned in other CS classes:
 
-If you have issues with the virtual environment:
+- Strategy pattern for gate logic
+- Factory pattern for creating gates
+- Data classes for type safety
 
-```bash
-# Remove existing venv
-rm -rf venv
+But the core algorithm is straightforward: parse HDL → build internal model → simulate with inputs → compare outputs.
 
-# Create new virtual environment
-python3 -m venv venv
+---
 
-# Activate
-source venv/bin/activate
-```
-
-## Development
-
-### Adding New Built-in Gates
-
-1. Add gate logic to `src/gates/builtin_gates.py`
-2. Update the `GateFactory._gate_definitions` dictionary
-3. Add tests in `tests/test_gates.py`
-
-### Extending the Parser
-
-1. Modify token patterns in `src/hdl_parser.py`
-2. Update parsing logic for new constructs
-3. Add corresponding tests
-
-## Examples
-
-### Basic Logic Gates
-
-**And.hdl:**
-
-```hdl
-CHIP And {
-    IN a, b;
-    OUT out;
-
-    PARTS:
-    Nand(a=a, b=b, out=nandOut);
-    Not(in=nandOut, out=out);
-}
-```
-
-### Advanced Examples
-
-#### Multiplexer (Mux)
-
-**Mux.hdl:**
-
-```hdl
-CHIP Mux {
-    IN a, b, sel;
-    OUT out;
-
-    PARTS:
-    Not(in=sel, out=notSel);
-    And(a=a, b=notSel, out=aAndNotSel);
-    And(a=b, b=sel, out=bAndSel);
-    Or(a=aAndNotSel, b=bAndSel, out=out);
-}
-```
-
-**Mux.tst:**
-
-```csv
-a,b,sel;out
-0,0,0;0
-0,0,1;0
-0,1,0;0
-0,1,1;1
-1,0,0;1
-1,0,1;0
-1,1,0;1
-1,1,1;1
-```
-
-#### Full Adder (3-bit addition)
-
-**FullAdder.hdl:**
-
-```hdl
-CHIP FullAdder {
-    IN a, b, c;
-    OUT sum, carry;
-
-    PARTS:
-    HalfAdder(a=a, b=b, sum=sum1, carry=carry1);
-    HalfAdder(a=sum1, b=c, sum=sum, carry=carry2);
-    Or(a=carry1, b=carry2, out=carry);
-}
-```
-
-This demonstrates recursive chip composition where FullAdder uses two HalfAdder chips.
-
-### Complete Example Set
-
-Our framework includes 7 comprehensive examples:
-
-| Chip          | Complexity | Inputs | Outputs | Test Cases | Description                     |
-| ------------- | ---------- | ------ | ------- | ---------- | ------------------------------- |
-| **And**       | Basic      | 2      | 1       | 4          | Logical AND gate                |
-| **Or**        | Basic      | 2      | 1       | 4          | Logical OR gate                 |
-| **Xor**       | Medium     | 2      | 1       | 4          | Exclusive OR using 5 sub-chips  |
-| **DMux**      | Medium     | 2      | 2       | 4          | Demultiplexer (1-to-2)          |
-| **Mux**       | Medium     | 3      | 1       | 8          | Multiplexer (2-to-1)            |
-| **HalfAdder** | Medium     | 2      | 2       | 4          | 1-bit addition without carry-in |
-| **FullAdder** | Complex    | 3      | 2       | 8          | 3-bit addition using HalfAdders |
-
-**Total: 36 test cases covering simple gates to complex recursive composition**
-
-### Simple AND Gate
-
-**And.hdl:**
-
-```hdl
-CHIP And {
-    IN a, b;
-    OUT out;
-
-    PARTS:
-    Nand(a=a, b=b, out=nandOut);
-    Not(in=nandOut, out=out);
-}
-```
-
-**And.tst:**
-
-```csv
-a,b;out
-0,0;0
-0,1;0
-1,0;0
-1,1;1
-```
-
-### XOR Gate (More Complex)
-
-**Xor.hdl:**
-
-```hdl
-CHIP Xor {
-    IN a, b;
-    OUT out;
-
-    PARTS:
-    Not(in=a, out=notA);
-    Not(in=b, out=notB);
-    And(a=a, b=notB, out=aAndNotB);
-    And(a=notA, b=b, out=notAAndB);
-    Or(a=aAndNotB, b=notAAndB, out=out);
-}
-```
-
-## Grading Criteria Compliance
-
-- ✅ **Correct parsing of HDL (30 points)**: Comprehensive parser with proper tokenization and AST building
-- ✅ **Accurate chip simulation (40 points)**: Correct gate logic and signal propagation with validation
-- ✅ **Correct test output (20 points)**: Detailed test reporting with pass/fail status and summary statistics
-- ✅ **Linting/formatting (10 points)**: Clean, well-formatted code following PEP 8 standards
-
-## Enhanced Features Summary
-
-Beyond the basic requirements, our implementation provides:
-
-- **53+ Comprehensive Tests**: Unit, integration, and validation tests
-- **Strategy Pattern Gates**: Extensible and maintainable gate implementations
-- **Advanced Validation**: Signal flow analysis and connection validation
-- **Rich Reporting**: Detailed test results with timestamps and execution metrics
-- **Factory Pattern**: Consistent object creation and management
-- **Type Safety**: Enums and data classes for better type safety
-- **Documentation**: Comprehensive documentation and examples
-
-## License
-
-This project is created for educational purposes as part of the Nand2Tetris course.
+_Final project for Nand2Tetris 2025 Spring_  
+_Free University of Tbilisi_
