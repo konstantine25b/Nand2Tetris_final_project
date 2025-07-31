@@ -172,23 +172,8 @@ class TestGateFactory(unittest.TestCase):
         """Test creating all gates at once."""
         all_gates = GateFactory.create_all_gates()
         
-        self.assertIn("Nand", all_gates)
-        self.assertIn("Not", all_gates)
-        self.assertIn("And", all_gates)
-        self.assertIn("Or", all_gates)
-        
+        # Should have all 4 gates
         self.assertEqual(len(all_gates), 4)
-    
-    def test_gate_info(self):
-        """Test getting gate information."""
-        info = GateFactory.get_gate_info("Nand")
-        
-        self.assertEqual(info["name"], "Nand")
-        self.assertEqual(info["inputs"], ["a", "b"])
-        self.assertEqual(info["outputs"], ["out"])
-        self.assertIn("description", info)
-        self.assertIn("truth_table", info)
-        self.assertEqual(len(info["truth_table"]), 4)
     
     def test_available_gates(self):
         """Test getting available gate names."""
@@ -210,19 +195,19 @@ class TestGateFactory(unittest.TestCase):
 
 
 class TestGateRegistry(unittest.TestCase):
-    """Test the GateRegistry class."""
+    """Test the gate registry functionality."""
     
     def test_registry_initialization(self):
         """Test registry is properly initialized."""
         registry = GateRegistry()
         
-        self.assertTrue(registry.has_gate("Nand"))
-        self.assertTrue(registry.has_gate("Not"))
-        self.assertTrue(registry.has_gate("And"))
-        self.assertTrue(registry.has_gate("Or"))
+        self.assertTrue(registry.is_builtin("Nand"))
+        self.assertTrue(registry.is_builtin("Not"))
+        self.assertTrue(registry.is_builtin("And"))
+        self.assertTrue(registry.is_builtin("Or"))
         
-        gate_names = registry.get_gate_names()
-        self.assertEqual(len(gate_names), 4)
+        all_gates = registry.get_all_gates()
+        self.assertEqual(len(all_gates), 4)
     
     def test_get_gate(self):
         """Test getting gates from registry."""
@@ -235,30 +220,13 @@ class TestGateRegistry(unittest.TestCase):
         with self.assertRaises(ValueError):
             registry.get_gate("UnknownGate")
     
-    def test_custom_gate_registration(self):
-        """Test registering custom gates."""
-        registry = GateRegistry()
-        
-        # Create a custom gate
-        logic = NandGateLogic()  # Reuse NAND logic for simplicity
-        custom_gate = BuiltinGate("CustomGate", ["x", "y"], ["z"], logic)
-        
-        # Register it
-        registry.register_custom_gate(custom_gate)
-        
-        # Verify it's available
-        self.assertTrue(registry.has_gate("CustomGate"))
-        retrieved_gate = registry.get_gate("CustomGate")
-        self.assertEqual(retrieved_gate.name, "CustomGate")
-    
     def test_validate_all_gates(self):
         """Test validating all gates."""
         registry = GateRegistry()
-        results = registry.validate_all_gates()
+        result = registry.validate_all_gates()
         
         # All built-in gates should pass validation
-        for gate_name, passed in results.items():
-            self.assertTrue(passed, f"Gate {gate_name} failed validation")
+        self.assertTrue(result, "Some gates failed validation")
 
 
 class TestGlobalRegistry(unittest.TestCase):

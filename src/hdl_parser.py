@@ -1,11 +1,7 @@
 """
-HDL Parser Module
+HDL Parser - parses HDL files into internal chip representations
 
-This module provides functionality to parse HDL files and build an internal
-representation of chips, their inputs, outputs, and parts.
-
-Author: HDL Parser Framework
-Course: Nand2Tetris 2025 Spring
+My implementation for parsing HDL syntax and building chip definitions.
 """
 
 import re
@@ -15,7 +11,7 @@ from dataclasses import dataclass
 
 @dataclass
 class ChipDefinition:
-    """Represents a parsed chip definition."""
+    """Basic chip definition with inputs, outputs, and parts."""
     name: str
     inputs: List[str]
     outputs: List[str]
@@ -24,14 +20,15 @@ class ChipDefinition:
 
 @dataclass
 class PartInstance:
-    """Represents an instance of a part within a chip."""
+    """A single chip instance used inside another chip."""
     chip_type: str
     connections: Dict[str, str]
 
 
 class HDLTokenizer:
-    """Tokenizes HDL files into manageable tokens."""
+    """Breaks HDL text into tokens for parsing."""
     
+    # All the different token types we need to recognize
     TOKEN_PATTERNS = [
         ('CHIP', r'\bCHIP\b'),
         ('IN', r'\bIN\b'),
@@ -52,26 +49,22 @@ class HDLTokenizer:
     ]
     
     def __init__(self):
+        # Build one big regex from all patterns
         self.token_regex = '|'.join(f'(?P<{name}>{pattern})' 
                                    for name, pattern in self.TOKEN_PATTERNS)
         self.regex = re.compile(self.token_regex)
     
     def tokenize(self, text: str) -> List[Tuple[str, str]]:
         """
-        Tokenize HDL text into a list of (token_type, token_value) tuples.
-        
-        Args:
-            text: HDL source code as string
-            
-        Returns:
-            List of token tuples, filtering out whitespace and comments
+        Break HDL text into tokens.
+        Returns list of (token_type, token_value) pairs.
         """
         tokens = []
         for match in self.regex.finditer(text):
             token_type = match.lastgroup
             token_value = match.group()
             
-            # Skip whitespace and comments
+            # Skip whitespace and comments - we don't need them
             if token_type not in ('WHITESPACE', 'COMMENT', 'NEWLINE'):
                 tokens.append((token_type, token_value))
         
@@ -80,12 +73,8 @@ class HDLTokenizer:
 
 class HDLParser:
     """
-    Parses tokenized HDL code and builds chip definitions.
-    
-    This parser handles the HDL grammar:
-    - CHIP declarations
-    - IN/OUT pin definitions
-    - PARTS section with chip instantiations
+    Main parser that turns tokens into chip definitions.
+    Handles the CHIP { IN ...; OUT ...; PARTS: ... } structure.
     """
     
     def __init__(self):
@@ -94,59 +83,35 @@ class HDLParser:
         self.position = 0
     
     def parse_file(self, filepath: str) -> ChipDefinition:
-        """
-        Parse an HDL file and return a ChipDefinition.
-        
-        Args:
-            filepath: Path to the HDL file
-            
-        Returns:
-            ChipDefinition object representing the parsed chip
-        """
+        """Parse an HDL file and return the chip definition."""
         with open(filepath, 'r') as file:
             content = file.read()
         
         return self.parse_text(content)
     
     def parse_text(self, text: str) -> ChipDefinition:
-        """
-        Parse HDL text and return a ChipDefinition.
-        
-        Args:
-            text: HDL source code as string
-            
-        Returns:
-            ChipDefinition object representing the parsed chip
-        """
+        """Parse HDL text and return the chip definition."""
         self.tokens = self.tokenizer.tokenize(text)
         self.position = 0
         
         return self._parse_chip()
     
     def _current_token(self) -> Optional[Tuple[str, str]]:
-        """Get the current token without advancing."""
+        """Get current token without moving forward."""
         if self.position < len(self.tokens):
             return self.tokens[self.position]
         return None
     
     def _advance(self) -> Optional[Tuple[str, str]]:
-        """Advance to the next token and return the current one."""
+        """Get current token and move to next one."""
         token = self._current_token()
         self.position += 1
         return token
     
     def _expect_token(self, expected_type: str) -> str:
         """
-        Expect a specific token type and return its value.
-        
-        Args:
-            expected_type: The expected token type
-            
-        Returns:
-            The token value
-            
-        Raises:
-            ValueError: If the current token doesn't match expected type
+        Make sure next token is what we expect, return its value.
+        Throws error if wrong token type.
         """
         token = self._advance()
         if not token or token[0] != expected_type:
@@ -154,26 +119,26 @@ class HDLParser:
         return token[1]
     
     def _parse_chip(self) -> ChipDefinition:
-        """Parse a complete chip definition."""
-        # Parse CHIP keyword
+        """Parse the whole CHIP { ... } block."""
+        # CHIP keyword
         self._expect_token('CHIP')
         
-        # Parse chip name
+        # Chip name
         chip_name = self._expect_token('IDENTIFIER')
         
-        # Parse opening brace
+        # Opening {
         self._expect_token('LBRACE')
         
-        # Parse IN section
+        # IN section
         inputs = self._parse_in_section()
         
-        # Parse OUT section
+        # OUT section
         outputs = self._parse_out_section()
         
-        # Parse PARTS section
+        # PARTS section
         parts = self._parse_parts_section()
         
-        # Parse closing brace
+        # Closing }
         self._expect_token('RBRACE')
         
         return ChipDefinition(
@@ -184,53 +149,53 @@ class HDLParser:
         )
     
     def _parse_in_section(self) -> List[str]:
-        """Parse the IN section and return list of input pin names."""
+        """Parse IN pin1, pin2, ...; section."""
         self._expect_token('IN')
         
         inputs = []
         
-        # Parse first input
+        # First input pin
         inputs.append(self._expect_token('IDENTIFIER'))
         
-        # Parse additional inputs separated by commas
+        # Additional pins separated by commas
         while (self._current_token() and 
                self._current_token()[0] == 'COMMA'):
-            self._advance()  # consume comma
+            self._advance()  # eat comma
             inputs.append(self._expect_token('IDENTIFIER'))
         
-        # Parse semicolon
+        # Semicolon at end
         self._expect_token('SEMICOLON')
         
         return inputs
     
     def _parse_out_section(self) -> List[str]:
-        """Parse the OUT section and return list of output pin names."""
+        """Parse OUT pin1, pin2, ...; section."""
         self._expect_token('OUT')
         
         outputs = []
         
-        # Parse first output
+        # First output pin
         outputs.append(self._expect_token('IDENTIFIER'))
         
-        # Parse additional outputs separated by commas
+        # Additional pins separated by commas
         while (self._current_token() and 
                self._current_token()[0] == 'COMMA'):
-            self._advance()  # consume comma
+            self._advance()  # eat comma
             outputs.append(self._expect_token('IDENTIFIER'))
         
-        # Parse semicolon
+        # Semicolon at end
         self._expect_token('SEMICOLON')
         
         return outputs
     
     def _parse_parts_section(self) -> List[PartInstance]:
-        """Parse the PARTS section and return list of part instances."""
+        """Parse PARTS: section with chip instantiations."""
         self._expect_token('PARTS')
         self._expect_token('COLON')
         
         parts = []
         
-        # Parse part instances until we hit the closing brace
+        # Keep parsing part instances until we hit closing }
         while (self._current_token() and 
                self._current_token()[0] != 'RBRACE'):
             parts.append(self._parse_part_instance())
@@ -238,35 +203,35 @@ class HDLParser:
         return parts
     
     def _parse_part_instance(self) -> PartInstance:
-        """Parse a single part instance."""
-        # Parse chip type
+        """Parse single chip instance like: And(a=x, b=y, out=z);"""
+        # Chip type name
         chip_type = self._expect_token('IDENTIFIER')
         
-        # Parse opening parenthesis
+        # Opening (
         self._expect_token('LPAREN')
         
-        # Parse connections
+        # Parse pin connections
         connections = {}
         
-        # Parse first connection
+        # First connection
         pin_name = self._expect_token('IDENTIFIER')
         self._expect_token('EQUALS')
         signal_name = self._expect_token('IDENTIFIER')
         connections[pin_name] = signal_name
         
-        # Parse additional connections separated by commas
+        # Additional connections separated by commas
         while (self._current_token() and 
                self._current_token()[0] == 'COMMA'):
-            self._advance()  # consume comma
+            self._advance()  # eat comma
             pin_name = self._expect_token('IDENTIFIER')
             self._expect_token('EQUALS')
             signal_name = self._expect_token('IDENTIFIER')
             connections[pin_name] = signal_name
         
-        # Parse closing parenthesis
+        # Closing )
         self._expect_token('RPAREN')
         
-        # Parse semicolon
+        # Semicolon at end
         self._expect_token('SEMICOLON')
         
         return PartInstance(

@@ -1,11 +1,7 @@
 """
-Built-in Gates Module
+Built-in Gates - implements the 4 basic gates using strategy pattern
 
-This module provides improved implementations of built-in gates using
-strategy pattern and better decomposition for extensibility.
-
-Author: HDL Parser Framework
-Course: Nand2Tetris 2025 Spring
+Better organized gate implementations that I can extend easily.
 """
 
 from typing import Dict, List, Optional, Any
@@ -14,31 +10,31 @@ from ..models.chip_models import BuiltinChipEvaluator, ChipDefinition, ChipType
 
 
 class GateLogic(ABC):
-    """Abstract base class for gate logic implementations."""
+    """Base class for different gate logic implementations."""
     
     @abstractmethod
     def compute(self, inputs: Dict[str, int]) -> Dict[str, int]:
-        """Compute gate outputs given inputs."""
+        """Figure out outputs given inputs."""
         pass
     
     @abstractmethod
     def get_truth_table(self) -> List[Dict[str, Any]]:
-        """Get the complete truth table for this gate."""
+        """Return the full truth table for this gate."""
         pass
 
 
 class NandGateLogic(GateLogic):
-    """NAND gate logic implementation."""
+    """NAND gate - output is 0 only when both inputs are 1."""
     
     def compute(self, inputs: Dict[str, int]) -> Dict[str, int]:
-        """Compute NAND gate: out = NOT (a AND b)"""
+        """Compute NAND: out = NOT (a AND b)"""
         a = inputs.get('a', 0)
         b = inputs.get('b', 0)
         result = 0 if (a == 1 and b == 1) else 1
         return {'out': result}
     
     def get_truth_table(self) -> List[Dict[str, Any]]:
-        """Get NAND gate truth table."""
+        """NAND truth table."""
         return [
             {'a': 0, 'b': 0, 'out': 1},
             {'a': 0, 'b': 1, 'out': 1},
@@ -48,16 +44,16 @@ class NandGateLogic(GateLogic):
 
 
 class NotGateLogic(GateLogic):
-    """NOT gate logic implementation."""
+    """NOT gate - just flip the input."""
     
     def compute(self, inputs: Dict[str, int]) -> Dict[str, int]:
-        """Compute NOT gate: out = NOT in"""
+        """Compute NOT: out = NOT in"""
         input_val = inputs.get('in', 0)
-        result = 0 if input_val == 1 else 1
+        result = 1 if input_val == 0 else 0
         return {'out': result}
     
     def get_truth_table(self) -> List[Dict[str, Any]]:
-        """Get NOT gate truth table."""
+        """NOT truth table."""
         return [
             {'in': 0, 'out': 1},
             {'in': 1, 'out': 0}
@@ -65,17 +61,17 @@ class NotGateLogic(GateLogic):
 
 
 class AndGateLogic(GateLogic):
-    """AND gate logic implementation."""
+    """AND gate - output is 1 only when both inputs are 1."""
     
     def compute(self, inputs: Dict[str, int]) -> Dict[str, int]:
-        """Compute AND gate: out = a AND b"""
+        """Compute AND: out = a AND b"""
         a = inputs.get('a', 0)
         b = inputs.get('b', 0)
         result = 1 if (a == 1 and b == 1) else 0
         return {'out': result}
     
     def get_truth_table(self) -> List[Dict[str, Any]]:
-        """Get AND gate truth table."""
+        """AND truth table."""
         return [
             {'a': 0, 'b': 0, 'out': 0},
             {'a': 0, 'b': 1, 'out': 0},
@@ -85,17 +81,17 @@ class AndGateLogic(GateLogic):
 
 
 class OrGateLogic(GateLogic):
-    """OR gate logic implementation."""
+    """OR gate - output is 1 when at least one input is 1."""
     
     def compute(self, inputs: Dict[str, int]) -> Dict[str, int]:
-        """Compute OR gate: out = a OR b"""
+        """Compute OR: out = a OR b"""
         a = inputs.get('a', 0)
         b = inputs.get('b', 0)
         result = 1 if (a == 1 or b == 1) else 0
         return {'out': result}
     
     def get_truth_table(self) -> List[Dict[str, Any]]:
-        """Get OR gate truth table."""
+        """OR truth table."""
         return [
             {'a': 0, 'b': 0, 'out': 0},
             {'a': 0, 'b': 1, 'out': 1},
@@ -105,109 +101,112 @@ class OrGateLogic(GateLogic):
 
 
 class BuiltinGate(BuiltinChipEvaluator):
-    """Enhanced built-in gate implementation using strategy pattern."""
+    """
+    Wrapper for built-in gates that handles validation and execution.
+    Uses strategy pattern so I can swap out different logic implementations.
+    """
     
     def __init__(self, name: str, inputs: List[str], outputs: List[str], 
-                 logic: GateLogic, description: Optional[str] = None):
-        super().__init__(name, inputs, outputs)
+                 logic: GateLogic, description: str = ""):
+        self.name = name
+        self.inputs = inputs
+        self.outputs = outputs
         self.logic = logic
         self.description = description
     
     def evaluate(self, input_values: Dict[str, int]) -> Dict[str, int]:
-        """Evaluate the gate using its logic strategy."""
-        # Validate inputs
-        self._validate_inputs(input_values)
+        """Run the gate with given inputs and return outputs."""
+        # Check that we have all required inputs
+        for pin in self.inputs:
+            if pin not in input_values:
+                raise ValueError(f"Missing input pin '{pin}' for gate {self.name}")
         
-        # Compute outputs using the logic strategy
-        outputs = self.logic.compute(input_values)
+        # Check input values are valid (0 or 1)
+        for pin, value in input_values.items():
+            if pin in self.inputs and value not in (0, 1):
+                raise ValueError(f"Invalid value {value} for pin '{pin}' (must be 0 or 1)")
         
-        # Validate outputs
-        self._validate_outputs(outputs)
+        # Run the logic
+        result = self.logic.compute(input_values)
         
-        return outputs
+        # Make sure we got all expected outputs
+        for pin in self.outputs:
+            if pin not in result:
+                raise ValueError(f"Gate {self.name} didn't produce output pin '{pin}'")
+        
+        return result
     
-    def _validate_inputs(self, input_values: Dict[str, int]):
-        """Validate input values."""
-        # Check that all required inputs are provided
-        for required_input in self.inputs:
-            if required_input not in input_values:
-                raise ValueError(f"Missing required input: {required_input}")
+    def get_chip_definition(self) -> ChipDefinition:
+        """Return a chip definition for this gate."""
+        from ..models.chip_models import Pin, PinType, create_chip_definition
         
-        # Check that input values are valid
-        for pin_name, value in input_values.items():
-            if pin_name in self.inputs and value not in (0, 1):
-                raise ValueError(f"Invalid input value for {pin_name}: {value}")
-    
-    def _validate_outputs(self, outputs: Dict[str, int]):
-        """Validate output values."""
-        # Check that all required outputs are provided
-        for required_output in self.outputs:
-            if required_output not in outputs:
-                raise ValueError(f"Gate logic failed to provide output: {required_output}")
+        input_pins = [Pin(name=pin, pin_type=PinType.INPUT) for pin in self.inputs]
+        output_pins = [Pin(name=pin, pin_type=PinType.OUTPUT) for pin in self.outputs]
         
-        # Check that output values are valid
-        for pin_name, value in outputs.items():
-            if value not in (0, 1):
-                raise ValueError(f"Invalid output value for {pin_name}: {value}")
-    
-    def get_truth_table(self) -> List[Dict[str, Any]]:
-        """Get the truth table for this gate."""
-        return self.logic.get_truth_table()
+        return create_chip_definition(
+            name=self.name,
+            pins=input_pins + output_pins,
+            parts=[],
+            chip_type=ChipType.BUILTIN,
+            description=self.description
+        )
     
     def test_all_combinations(self) -> bool:
-        """Test all input combinations against the truth table."""
-        truth_table = self.get_truth_table()
+        """Test this gate against its truth table to make sure it works."""
+        truth_table = self.logic.get_truth_table()
         
         for row in truth_table:
-            # Extract inputs and expected outputs from truth table row
-            inputs = {pin: row[pin] for pin in self.inputs if pin in row}
-            expected_outputs = {pin: row[pin] for pin in self.outputs if pin in row}
+            # Separate inputs from expected outputs
+            inputs = {k: v for k, v in row.items() if k in self.inputs}
+            expected_outputs = {k: v for k, v in row.items() if k in self.outputs}
             
-            # Compute actual outputs
+            # Run the gate
             actual_outputs = self.evaluate(inputs)
             
-            # Compare with expected
-            if actual_outputs != expected_outputs:
-                return False
+            # Check if outputs match
+            for pin, expected in expected_outputs.items():
+                if actual_outputs.get(pin) != expected:
+                    return False
         
         return True
 
 
 class GateFactory:
-    """Factory for creating built-in gates."""
+    """Factory to create the 4 built-in gates we need."""
     
+    # Define all our gates here
     _gate_definitions = {
         'Nand': {
             'inputs': ['a', 'b'],
             'outputs': ['out'],
             'logic_class': NandGateLogic,
-            'description': 'Logical NAND gate: out = NOT (a AND b)'
+            'description': 'NAND gate: out = NOT (a AND b)'
         },
         'Not': {
             'inputs': ['in'],
             'outputs': ['out'],
             'logic_class': NotGateLogic,
-            'description': 'Logical NOT gate: out = NOT in'
+            'description': 'NOT gate: out = NOT in'
         },
         'And': {
             'inputs': ['a', 'b'],
             'outputs': ['out'],
             'logic_class': AndGateLogic,
-            'description': 'Logical AND gate: out = a AND b'
+            'description': 'AND gate: out = a AND b'
         },
         'Or': {
             'inputs': ['a', 'b'],
             'outputs': ['out'],
             'logic_class': OrGateLogic,
-            'description': 'Logical OR gate: out = a OR b'
+            'description': 'OR gate: out = a OR b'
         }
     }
     
     @classmethod
     def create_gate(cls, gate_name: str) -> BuiltinGate:
-        """Create a built-in gate by name."""
+        """Create a gate by name."""
         if gate_name not in cls._gate_definitions:
-            raise ValueError(f"Unknown built-in gate: {gate_name}")
+            raise ValueError(f"Don't know how to make gate: {gate_name}")
         
         definition = cls._gate_definitions[gate_name]
         logic = definition['logic_class']()
@@ -230,99 +229,72 @@ class GateFactory:
     
     @classmethod
     def get_available_gates(cls) -> List[str]:
-        """Get list of available built-in gate names."""
+        """Get list of gate names we can create."""
         return list(cls._gate_definitions.keys())
     
     @classmethod
     def is_builtin_gate(cls, gate_name: str) -> bool:
-        """Check if a gate name is a built-in gate."""
+        """Check if we can make this gate."""
         return gate_name in cls._gate_definitions
-    
-    @classmethod
-    def get_gate_info(cls, gate_name: str) -> Dict[str, Any]:
-        """Get information about a built-in gate."""
-        if gate_name not in cls._gate_definitions:
-            raise ValueError(f"Unknown built-in gate: {gate_name}")
-        
-        definition = cls._gate_definitions[gate_name]
-        gate = cls.create_gate(gate_name)
-        
-        return {
-            'name': gate_name,
-            'inputs': definition['inputs'],
-            'outputs': definition['outputs'],
-            'description': definition['description'],
-            'truth_table': gate.get_truth_table()
-        }
 
 
 class GateRegistry:
-    """Registry for managing built-in gates."""
+    """Keeps track of all our built-in gates."""
     
     def __init__(self):
-        self._gates = {}
-        self._initialize_builtin_gates()
-    
-    def _initialize_builtin_gates(self):
-        """Initialize all built-in gates."""
         self._gates = GateFactory.create_all_gates()
     
     def get_gate(self, gate_name: str) -> BuiltinGate:
-        """Get a built-in gate by name."""
+        """Get a gate by name."""
         if gate_name not in self._gates:
-            raise ValueError(f"Gate not found: {gate_name}")
+            raise ValueError(f"Unknown gate: {gate_name}")
         return self._gates[gate_name]
     
-    def has_gate(self, gate_name: str) -> bool:
-        """Check if a gate is available."""
-        return gate_name in self._gates
-    
     def get_all_gates(self) -> Dict[str, BuiltinGate]:
-        """Get all available gates."""
+        """Get all gates."""
         return self._gates.copy()
     
-    def get_gate_names(self) -> List[str]:
-        """Get list of all gate names."""
-        return list(self._gates.keys())
+    def is_builtin(self, gate_name: str) -> bool:
+        """Check if this is a built-in gate."""
+        return gate_name in self._gates
     
-    def register_custom_gate(self, gate: BuiltinGate):
-        """Register a custom gate."""
-        self._gates[gate.name] = gate
-    
-    def validate_all_gates(self) -> Dict[str, bool]:
-        """Validate all gates against their truth tables."""
-        results = {}
+    def validate_all_gates(self) -> bool:
+        """Test all gates to make sure they work correctly."""
         for gate_name, gate in self._gates.items():
-            try:
-                results[gate_name] = gate.test_all_combinations()
-            except Exception as e:
-                results[gate_name] = False
-        return results
+            if not gate.test_all_combinations():
+                print(f"Gate {gate_name} failed validation!")
+                return False
+        return True
 
 
-# Create a global gate registry instance
+# Global registry that everyone can use
 gate_registry = GateRegistry()
 
 
-# Convenience functions for backward compatibility
+# Helper functions for easy access
 def get_builtin_gate(gate_name: str) -> BuiltinGate:
-    """Get a built-in gate (convenience function)."""
+    """Get a built-in gate by name."""
     return gate_registry.get_gate(gate_name)
 
 
 def is_builtin_gate(gate_name: str) -> bool:
-    """Check if a gate is built-in (convenience function)."""
-    return gate_registry.has_gate(gate_name)
+    """Check if this is a built-in gate."""
+    return gate_registry.is_builtin(gate_name)
+
+
+def validate_all_builtin_gates() -> bool:
+    """Test all built-in gates."""
+    return gate_registry.validate_all_gates()
 
 
 def get_all_builtin_gates() -> Dict[str, BuiltinGate]:
-    """Get all built-in gates (convenience function)."""
+    """Get all built-in gates."""
     return gate_registry.get_all_gates()
 
 
-# Legacy compatibility functions (for old code)
+# Legacy compatibility for old code
 class BuiltInGates:
-    """Legacy compatibility class."""
+    """Old-style interface for backwards compatibility."""
     
     @staticmethod
     def nand(a: int, b: int) -> int:
