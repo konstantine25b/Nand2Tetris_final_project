@@ -541,4 +541,3 @@ Beyond the basic requirements, our implementation provides:
 ## License
 
 This project is created for educational purposes as part of the Nand2Tetris course.
-# Nand2Tetris_final_project

@@ -1,0 +1,10 @@
+# Core dependencies for HDL Parser and Testing Framework
+# No external dependencies required - using only Python standard library
+
+# Development and testing dependencies (optional)
+# pytest>=7.0.0
+# black>=22.0.0
+# flake8>=4.0.0
+
+# Note: This project is designed to work with Python 3.7+ standard library only
+# to ensure compatibility and minimal setup requirements 
